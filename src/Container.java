@@ -17,6 +17,7 @@ public class Container {
 	boolean pause;
 	public int pauseTime;
 	public boolean endpartie = false;
+	public ArrayList<VampireHitInfo> vampireHits;
 	public Container(ArrayList<Vampire> vampList, Pistoleros pist,	ArrayList<Obstacle> obstacles) {
 		this.vampList = vampList;
 		bullets = new ArrayList<Bullet>();
@@ -27,6 +28,7 @@ public class Container {
 		gameSpeedVampire = new SimpleDoubleProperty();
 		gameSpeedPistolero =  new SimpleDoubleProperty();
 		timer = new SimpleIntegerProperty() ;
+		vampireHits = new ArrayList<VampireHitInfo>();
 
 		pauseTime=20;
 		pause = false;
@@ -184,7 +186,36 @@ public class Container {
 			for(int j=0;j<bullets.size();j++){
 				if((vampList.get(i).collides(bullets.get(j))|| bullets.get(j).collides(vampList.get(i))) && vampList.get(i).isAlive() && !bullets.get(j).explose){
 					pist.up_kill_scoring();
+
+					// Determine bullet direction from movement
+					int bulletDir = 0;
+					if(bullets.get(j).moveX > 0) bulletDir = 1;
+					else if(bullets.get(j).moveX < 0) bulletDir = 3;
+					else if(bullets.get(j).moveY > 0) bulletDir = 2;
+					else if(bullets.get(j).moveY < 0) bulletDir = 0;
+
+					// Apply knockback to vampire
+					double knockbackForce = 30;
+					if(bullets.get(j).moveX != 0) {
+						vampList.get(i).posX += (bullets.get(j).moveX / Math.abs(bullets.get(j).moveX)) * knockbackForce;
+					}
+					if(bullets.get(j).moveY != 0) {
+						vampList.get(i).posY += (bullets.get(j).moveY / Math.abs(bullets.get(j).moveY)) * knockbackForce;
+					}
+
 					vampList.get(i).getHurt(pist.getDammage());
+
+					// Record hit for visual effects
+					boolean isDeath = !vampList.get(i).isAlive();
+					VampireHitInfo hitInfo = new VampireHitInfo(
+						vampList.get(i),
+						bullets.get(j).posX,
+						bullets.get(j).posY,
+						bulletDir,
+						isDeath
+					);
+					vampireHits.add(hitInfo);
+
 					bullets.get(j).explose=true;
 					break;
 				}

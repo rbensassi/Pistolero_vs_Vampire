@@ -21,6 +21,12 @@ public class ContainerView extends VBox{
 
 	private ArrayList<AnimationExplosion>  animation;
 	private ArrayList<AnimationDeath>  death;
+	private ArrayList<AnimationMuzzleFlash> muzzleFlashes;
+	private ArrayList<AnimationBloodSplatter> bloodSplatters;
+	private ScreenShake screenShake;
+	private LowHealthVignette lowHealthVignette;
+	private HitPause hitPause;
+	private CameraZoom cameraZoom;
 	Label tv;
 	Pane p;
 	private boolean begin = true;
@@ -37,6 +43,12 @@ public class ContainerView extends VBox{
 		loadObstacle();
 		animation = new ArrayList<AnimationExplosion>();
 		death = new ArrayList<AnimationDeath>();
+		muzzleFlashes = new ArrayList<AnimationMuzzleFlash>();
+		bloodSplatters = new ArrayList<AnimationBloodSplatter>();
+		screenShake = new ScreenShake(p);
+		lowHealthVignette = new LowHealthVignette(p, WIDTH, HEIGHT);
+		hitPause = new HitPause(container);
+		cameraZoom = new CameraZoom(p);
 		bleed = new AnimationBleed(getPlayer());
 	}
 
@@ -44,6 +56,9 @@ public class ContainerView extends VBox{
 		p.requestFocus();
 		relocateAll();
 		removingDeath();
+
+		// Update low health vignette effect
+		lowHealthVignette.update(container.pist.life.getValue(), 3);
 	}
 
 	public void relocateAll(){
@@ -62,15 +77,65 @@ public class ContainerView extends VBox{
 				sonTire.play();
 				bullets.add(new BulletView(container.bullets.get(i),p));
 				bullets.get(i).add();
+
+				// Add muzzle flash and screen shake when shooting
+				Pistoleros pist = container.pist;
+				double flashX = pist.posX + pist.width / 2;
+				double flashY = pist.posY + pist.height / 2;
+				AnimationMuzzleFlash flash = new AnimationMuzzleFlash(flashX, flashY, pist.sens, p);
+				flash.play();
+				muzzleFlashes.add(flash);
+				screenShake.lightShake();
 			}
 			bullets.get(i).update();
 		}
 		for(int i=0;i<obstacles.size();i++){
 			obstacles.get(i).imageView.relocate(obstacles.get(i).caisse.posX,obstacles.get(i).caisse.posY);
 		}
+
+		// Clean up finished muzzle flashes
+		for(int i = muzzleFlashes.size() - 1; i >= 0; i--) {
+			if(muzzleFlashes.get(i).isFinished) {
+				muzzleFlashes.remove(i);
+			}
+		}
+
+		// Clean up finished blood splatters
+		for(int i = bloodSplatters.size() - 1; i >= 0; i--) {
+			if(bloodSplatters.get(i).isFinished) {
+				bloodSplatters.remove(i);
+			}
+		}
 	}
 	
 	public void removingDeath(){
+		// Process vampire hits for visual effects
+		for(int i = 0; i < container.vampireHits.size(); i++) {
+			VampireHitInfo hit = container.vampireHits.get(i);
+
+			// Add blood splatter
+			AnimationBloodSplatter blood = new AnimationBloodSplatter(
+				hit.hitX,
+				hit.hitY,
+				hit.bulletDirection,
+				p
+			);
+			blood.play();
+			bloodSplatters.add(blood);
+
+			// Screen shake, hit pause, and camera zoom based on hit type
+			if(hit.isDeath) {
+				screenShake.heavyShake();
+				hitPause.heavyPause();
+				cameraZoom.mediumZoom();
+			} else {
+				screenShake.mediumShake();
+				hitPause.lightPause();
+				cameraZoom.smallZoom();
+			}
+		}
+		container.vampireHits.clear();
+
 		for(int i=0;i<animation.size();i++){
 			if(animation.get(i).isFinished){
 				animation.remove(i);
