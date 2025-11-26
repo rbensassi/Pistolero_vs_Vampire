@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,6 +18,14 @@ public class Container {
 	boolean pause;
 	public int pauseTime;
 	public boolean endpartie = false;
+
+	// Vampire Survivors systems
+	public ArrayList<XPGem> xpGems;
+	public WaveManager waveManager;
+	private double continuousSpawnTimer;
+	private static final double CONTINUOUS_SPAWN_INTERVAL = 2.0; // Spawn every 2 seconds
+	private static final int XP_PER_KILL = 5;
+
 	public Container(ArrayList<Vampire> vampList, Pistoleros pist,	ArrayList<Obstacle> obstacles) {
 		this.vampList = vampList;
 		bullets = new ArrayList<Bullet>();
@@ -30,6 +39,11 @@ public class Container {
 
 		pauseTime=20;
 		pause = false;
+
+		// Initialize Vampire Survivors systems
+		this.xpGems = new ArrayList<XPGem>();
+		this.waveManager = new WaveManager(pist.maxX, pist.maxY);
+		this.continuousSpawnTimer = 0;
 	}
 	public void update(double speed){
 		if(pist.kc.pause() && pauseTime==20){
@@ -45,6 +59,11 @@ public class Container {
 			vampMove(speed);
 			checkCollides(speed);
 
+			// Vampire Survivors updates
+			updateAutoFire(speed);
+			updateXPGems(speed);
+			updateWaves(speed);
+			updateContinuousSpawn(speed);
 		}
 		else{
 			stop();
@@ -186,6 +205,11 @@ public class Container {
 					pist.up_kill_scoring();
 					vampList.get(i).getHurt(pist.getDammage());
 					bullets.get(j).explose=true;
+
+					// Drop XP gem if vampire dies (Vampire Survivors style)
+					if (!vampList.get(i).isAlive()) {
+						spawnXPGem(vampList.get(i).getCenterX(), vampList.get(i).getCenterY(), XP_PER_KILL);
+					}
 					break;
 				}
 			}
@@ -296,6 +320,87 @@ public class Container {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Update auto-fire system (Vampire Survivors style)
+	 */
+	private void updateAutoFire(double speed) {
+		AutoFireSystem autoFire = pist.getAutoFireSystem();
+
+		if (autoFire.update(speed)) {
+			// Find nearest enemy
+			Vampire target = autoFire.findNearestEnemy(pist, vampList);
+
+			// Create auto-fire bullets
+			ArrayList<Bullet> autoBullets = autoFire.createBullets(pist, target, 400);
+			bullets.addAll(autoBullets);
+		}
+	}
+
+	/**
+	 * Update XP gems (magnet effect and collection)
+	 */
+	private void updateXPGems(double speed) {
+		Iterator<XPGem> iterator = xpGems.iterator();
+
+		while (iterator.hasNext()) {
+			XPGem gem = iterator.next();
+			gem.setMagnetRange(pist.getPickupRange());
+			gem.update(speed, pist);
+
+			if (gem.isCollected()) {
+				pist.addXP(gem.getXpValue());
+				iterator.remove();
+			}
+		}
+	}
+
+	/**
+	 * Update wave system
+	 */
+	private void updateWaves(double speed) {
+		if (waveManager.update(speed)) {
+			// Spawn new wave
+			ArrayList<Vampire> newWave = waveManager.generateWave();
+			vampList.addAll(newWave);
+
+			// Expand choix array
+			int[] newChoix = new int[vampList.size()];
+			System.arraycopy(choix, 0, newChoix, 0, Math.min(choix.length, newChoix.length));
+			choix = newChoix;
+		}
+	}
+
+	/**
+	 * Continuous enemy spawning between waves
+	 */
+	private void updateContinuousSpawn(double speed) {
+		continuousSpawnTimer += speed;
+
+		if (continuousSpawnTimer >= CONTINUOUS_SPAWN_INTERVAL) {
+			continuousSpawnTimer = 0;
+
+			// Spawn 1-3 enemies continuously
+			int spawnCount = 1 + (int)(Math.random() * 3);
+			for (int i = 0; i < spawnCount; i++) {
+				Vampire newVampire = waveManager.spawnContinuousEnemy();
+				vampList.add(newVampire);
+			}
+
+			// Expand choix array
+			int[] newChoix = new int[vampList.size()];
+			System.arraycopy(choix, 0, newChoix, 0, Math.min(choix.length, newChoix.length));
+			choix = newChoix;
+		}
+	}
+
+	/**
+	 * Spawn XP gem at position
+	 */
+	public void spawnXPGem(double x, double y, int xpValue) {
+		XPGem gem = new XPGem(x, y, xpValue, pist.maxX, pist.maxY);
+		xpGems.add(gem);
 	}
 
 }
