@@ -91,15 +91,37 @@ public abstract class Sprite {
 	public double getMaxY() {
 		return maxY;
 	}
+	// Improved collision detection using AABB (Axis-Aligned Bounding Box)
 	public boolean collides(Sprite s){
+		return !(posX + width < s.posX ||  // this is to the left of s
+				 s.posX + s.width < posX ||  // s is to the left of this
+				 posY + height < s.posY ||   // this is above s
+				 s.posY + s.height < posY);  // s is above this
+	}
 
-		if((s.posX<=posX && posX <= s.posX+s.width && s.posY <= posY && posY <= s.posY+s.height) || (s.posX <= posX +width && posX+width <= s.posX+ s.width && s.posY <= posY && posY <= s.posY+s.height ) 
-				|| (s.posX<=posX && posX <= s.posX+s.width && s.posY <= posY+height && posY+height <= s.posY+s.height) && (s.posX <= posX +width && posX+width <= s.posX+ s.width && s.posY <= posY+height && posY+height <= s.posY+s.height) ) {
-			return true;
-		}
-		
-		else return false;
-			
+	// Check collision with specific coordinates and dimensions
+	public boolean collidesWithRect(double x, double y, double w, double h) {
+		return !(posX + width < x ||
+				 x + w < posX ||
+				 posY + height < y ||
+				 y + h < posY);
+	}
+
+	// Get the center X position
+	public double getCenterX() {
+		return posX + width / 2;
+	}
+
+	// Get the center Y position
+	public double getCenterY() {
+		return posY + height / 2;
+	}
+
+	// Calculate distance to another sprite
+	public double distanceTo(Sprite s) {
+		double dx = getCenterX() - s.getCenterX();
+		double dy = getCenterY() - s.getCenterY();
+		return Math.sqrt(dx * dx + dy * dy);
 	}
 	public boolean inBorder(){
 		if(posX==0 || posY==0 || posX+width==maxX || posX+height==maxY)
