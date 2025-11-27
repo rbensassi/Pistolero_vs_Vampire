@@ -142,17 +142,17 @@ public class Player extends Entity {
                 projectileCount += (int) upgrade.getValue();
                 break;
             case MOVE_SPEED:
-                speed = BASE_SPEED * (1.0f + upgrade.getCurrentValue());
+                speed = (float) (BASE_SPEED * (1.0f + upgrade.getCurrentValue()));
                 break;
             case MAX_HEALTH:
                 maxHealth += (int) upgrade.getValue();
                 health = Math.min(health + (int) upgrade.getValue(), maxHealth);
                 break;
             case PICKUP_RANGE:
-                pickupRange = 100.0f * (1.0f + upgrade.getCurrentValue());
+                pickupRange = (float) (100.0f * (1.0f + upgrade.getCurrentValue()));
                 break;
             case ARMOR:
-                armorReduction = Math.min(0.75f, armorReduction + upgrade.getValue());
+                armorReduction = (float) Math.min(0.75f, armorReduction + upgrade.getValue());
                 break;
             default:
                 break;
