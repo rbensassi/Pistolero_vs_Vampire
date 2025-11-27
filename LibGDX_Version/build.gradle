@@ -37,6 +37,14 @@ project(":desktop") {
         mainClass = 'com.pistolero.desktop.DesktopLauncher'
     }
 
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/']
+            }
+        }
+    }
+
     dependencies {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
@@ -71,6 +79,14 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java-library"
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/']
+            }
+        }
+    }
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
