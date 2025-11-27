@@ -1,0 +1,15 @@
+#!/bin/sh
+
+##############################################################################
+# Gradle wrapper script
+##############################################################################
+
+# Attempt to set APP_HOME
+SAVED="`pwd`"
+cd "`dirname \"$0\"`"
+APP_HOME="`pwd -P`"
+cd "$SAVED"
+
+GRADLE_USER_HOME="${GRADLE_USER_HOME:-$HOME/.gradle}"
+
+exec "gradle" "$@"
