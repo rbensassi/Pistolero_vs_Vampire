@@ -56,11 +56,12 @@ project(":desktop") {
         workingDir = rootProject.file('assets')
         ignoreExitValue = true
 
-        // JVM optimizations
+        // JVM optimizations and macOS requirements
         jvmArgs = [
             '-Xms512m',
             '-Xmx1024m',
-            '-XX:+UseG1GC'
+            '-XX:+UseG1GC',
+            '-XstartOnFirstThread'  // Required for macOS OpenGL/GLFW
         ]
     }
 
