@@ -33,7 +33,9 @@ project(":desktop") {
     apply plugin: "java-library"
     apply plugin: "application"
 
-    mainClassName = "com.pistolero.desktop.DesktopLauncher"
+    application {
+        mainClass = 'com.pistolero.desktop.DesktopLauncher'
+    }
 
     dependencies {
         implementation project(":core")
