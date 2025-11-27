@@ -112,6 +112,15 @@ fi
 echo ""
 echo -e "${BOLD}🚀 Lancement du jeu...${NC}"
 echo ""
+
+# Vérifier si c'est la première exécution (pas de .gradle dans le projet)
+if [ ! -d ".gradle" ]; then
+    warning "Première exécution détectée"
+    info "Téléchargement des dépendances LibGDX (~50 MB)..."
+    info "Cela peut prendre 1-2 minutes selon votre connexion"
+    echo ""
+fi
+
 echo -e "${CYAN}╔═══════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║${NC}  ${BOLD}Nouvelles fonctionnalités:${NC}                ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}  • Tir automatique sur les ennemis        ${CYAN}║${NC}"
@@ -122,7 +131,7 @@ echo -e "${CYAN}║${NC}  • Gemmes d'XP magnétiques                ${CYAN}║
 echo -e "${CYAN}║${NC}  • Performance 60 FPS garanti             ${CYAN}║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${YELLOW}📖 Consultez README.md et MIGRATION_LIBGDX.md pour plus d'infos${NC}"
+echo -e "${YELLOW}📖 Consultez README.md, MIGRATION_LIBGDX.md et TROUBLESHOOTING.md${NC}"
 echo ""
 
 # Options macOS spécifiques pour de meilleures performances
@@ -148,8 +157,9 @@ else
     echo ""
     echo "  💡 Dépannage:"
     echo "     - Vérifiez que Java est bien installé"
-    echo "     - Consultez les logs ci-dessus"
-    echo "     - Voir README.md section 'Dépannage'"
+    echo "     - Si erreur de téléchargement: vérifiez votre connexion internet"
+    echo "     - Consultez TROUBLESHOOTING.md pour les solutions"
+    echo "     - Logs complets ci-dessus"
     echo ""
 fi
 
