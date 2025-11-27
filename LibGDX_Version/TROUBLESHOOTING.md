@@ -1,5 +1,49 @@
 # 🔧 Guide de dépannage - LibGDX Version
 
+## ⚠️ PROBLÈME FRÉQUENT : ClassNotFoundException au premier lancement
+
+### Symptôme
+```
+Erreur : impossible de trouver ou de charger la classe principale com.pistolero.desktop.DesktopLauncher
+Causé par : java.lang.ClassNotFoundException: com.pistolero.desktop.DesktopLauncher
+```
+
+### Cause
+**Les dépendances LibGDX n'ont pas encore été téléchargées.** C'est normal au premier lancement !
+
+### ✅ Solution - Télécharger les dépendances d'abord
+
+**Étape 1 : Vérifier votre connexion internet**
+```bash
+# Test rapide
+ping google.com
+curl -I https://repo.maven.apache.org/maven2/
+```
+
+**Étape 2 : Télécharger les dépendances (~50 MB)**
+```bash
+cd /Users/work/clubmed/Pistolero_vs_Vampire/LibGDX_Version
+
+# Télécharger et compiler (prend 1-2 minutes)
+./gradlew desktop:build
+
+# Une fois terminé, lancer le jeu
+./gradlew desktop:run
+```
+
+**OU utiliser le script automatique :**
+```bash
+./run-macos.sh
+```
+
+### Notes importantes
+- ⏱️ Le **premier build prend 1-2 minutes** (téléchargement + compilation)
+- 📦 Environ **50 MB** de dépendances seront téléchargées
+- 🌐 **Connexion internet requise** pour le premier lancement uniquement
+- ✅ Les lancements suivants seront instantanés (tout est en cache)
+
+---
+
 ## Problème : "task 'run' not found" ✅ RÉSOLU
 
 Ce problème a été corrigé dans le dernier commit. La configuration Gradle inclut maintenant :
